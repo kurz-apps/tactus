@@ -7,6 +7,7 @@
          out_dir/dbn_input.npy  (T, 2) what madmom's DBN receives
          out_dir/result.json    allin1's final output
   reference.py na <out_dir>                 random neighborhood-attention inputs with NATTEN's outputs
+  reference.py filterbank <out_dir>         madmom's (1024, 81) logarithmic filterbank for 44.1 kHz
 """
 import json, sys
 from pathlib import Path
@@ -90,5 +91,16 @@ def na(out):
     print(f"{len(cases)} cases")
 
 
+def filterbank(out):
+    from madmom.audio.filters import LogarithmicFilterbank
+    from madmom.audio.stft import fft_frequencies
+
+    out = Path(out)
+    out.mkdir(parents=True, exist_ok=True)
+    fb = LogarithmicFilterbank(fft_frequencies(1024, 44100), num_bands=12, fmin=30, fmax=17000, norm_filters=True, unique_filters=True)
+    np.save(out / "filterbank.npy", np.asarray(fb))
+    print(fb.shape)
+
+
 if __name__ == "__main__":
-    {"song": song, "na": na}[sys.argv[1]](*sys.argv[2:])
+    {"song": song, "na": na, "filterbank": filterbank}[sys.argv[1]](*sys.argv[2:])
