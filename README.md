@@ -6,7 +6,22 @@ Beat, downbeat, tempo and section analysis in Swift, running on the Mac GPU (MLX
 
 It implements the model from **All-In-One Metrical And Functional Structure Analysis With Neighborhood Attentions on Demixed Audio** (Taejun Kim and Juhan Nam, WASPAA 2023, [arXiv 2307.16425](https://arxiv.org/abs/2307.16425)), using the authors' pretrained weights ([`taejunkim/allinone`](https://huggingface.co/taejunkim/allinone) on Hugging Face, MIT). It is not a different model: it reproduces the output of the reference implementation, [`mir-aidj/all-in-one`](https://github.com/mir-aidj/all-in-one) (MIT), which relies on NATTEN kernels that have no Metal version.
 
-See [PLAN.md](PLAN.md) for the work plan and status.
+## Usage
+
+Needs a Mac with Apple silicon and Xcode with the Metal Toolchain (`xcodebuild -downloadComponent MetalToolchain`); `swift build` alone does not compile MLX's shaders. The weights are converted once with `tools/convert.py` (see [PLAN.md](PLAN.md)) into `weights/`.
+
+```
+xcodebuild build -scheme tactus-cli -configuration Release -destination 'platform=macOS' -derivedDataPath .build/xcode
+alias tactus=.build/xcode/Build/Products/Release/tactus-cli
+
+tactus analyze path/to/stems                       # bass.wav drums.wav other.wav vocals.wav, 44.1 kHz; JSON on stdout
+tactus serve --port 8080                           # listens on 127.0.0.1 only
+curl -F bass=@bass.wav -F drums=@drums.wav -F other=@other.wav -F vocals=@vocals.wav http://127.0.0.1:8080/analyze
+```
+
+Options: `--weights DIR` (default `weights`). The server analyzes one song at a time; there is no authentication, which is why it only binds to the loopback address.
+
+See [PLAN.md](PLAN.md) for the work plan, measurements and status.
 
 ## Architecture
 
@@ -55,4 +70,4 @@ Runs on the CPU, ported from the reference:
 
 ## License
 
-To be decided. The upstream code and weights are MIT.
+To be decided. The upstream code and weights are MIT; the DBN and the spectrogram are derived from madmom (BSD). See [NOTICE](NOTICE).

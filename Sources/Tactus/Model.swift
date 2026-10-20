@@ -27,7 +27,11 @@ public struct AllInOne {
     /// Mean of the logits of all folds (the released `harmonix-all` ensemble).
     /// `spec`: [4, T, 81] spectrogram, one per stem (bass, drums, other, vocals).
     public func ensemble(_ spec: MLXArray) -> Logits {
-        let all = (0..<folds).map { logits(spec, fold: $0) }
+        let all = (0..<folds).map { fold -> Logits in
+            let l = logits(spec, fold: fold)
+            eval(l.beat, l.downbeat, l.section, l.function)  // one fold at a time: the 2D attention windows of all 8 at once would not fit for a long song
+            return l
+        }
         func mean(_ f: (Logits) -> MLXArray) -> MLXArray { MLX.stacked(all.map(f)).mean(axis: 0) }
         return Logits(beat: mean(\.beat), downbeat: mean(\.downbeat), section: mean(\.section), function: mean(\.function))
     }

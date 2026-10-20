@@ -16,7 +16,7 @@ public struct Stem {
     public var integer: Bool
 
     public init(contentsOf url: URL) throws {
-        let file = try AVAudioFile(forReading: url)
+        guard let file = try? AVAudioFile(forReading: url) else { throw TactusError.unsupported("\(url.lastPathComponent): cannot be read as audio") }
         let format = file.fileFormat
         guard format.sampleRate == 44100 else { throw TactusError.unsupported("\(url.lastPathComponent): \(format.sampleRate) Hz, expected 44100") }
         let integer = format.commonFormat == .pcmFormatInt16

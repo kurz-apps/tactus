@@ -4,3 +4,4 @@
 DerivedData/
 fixtures/
 weights/
+*.profraw
