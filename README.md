@@ -14,7 +14,7 @@ Needs a Mac with Apple silicon and Xcode with the Metal Toolchain (`xcodebuild -
 xcodebuild build -scheme tactus-cli -configuration Release -destination 'platform=macOS' -derivedDataPath .build/xcode
 alias tactus=.build/xcode/Build/Products/Release/tactus-cli
 
-tactus analyze path/to/stems                       # bass.wav drums.wav other.wav vocals.wav, 44.1 kHz; JSON on stdout
+tactus analyze path/to/stems                       # bass, drums, other, vocals as .wav .mp3 .m4a or .flac; JSON on stdout
 tactus serve --port 8080                           # listens on 127.0.0.1 only
 curl -F bass=@bass.wav -F drums=@drums.wav -F other=@other.wav -F vocals=@vocals.wav http://127.0.0.1:8080/analyze
 ```
@@ -36,7 +36,7 @@ flowchart LR
   F --> G
 ```
 
-**Input and output.** The input is the four Demucs stems of a song; separation itself is out of scope. The output is JSON in the same shape as `allin1`: `bpm`, `beats`, `downbeats`, `beat_positions`, `segments`.
+**Input and output.** The input is the four Demucs stems of a song; separation itself is out of scope. WAV, MP3, M4A and FLAC are decoded with AVFoundation (the format is detected from the content) and resampled to 44.1 kHz when they are not already; compressed files are rounded to 16 bits before the mono mix, as madmom gets them from ffmpeg. The output is JSON in the same shape as `allin1`: `bpm`, `beats`, `downbeats`, `beat_positions`, `segments`.
 
 ### Spectrogram
 

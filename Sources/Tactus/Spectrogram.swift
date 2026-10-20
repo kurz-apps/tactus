@@ -8,10 +8,11 @@ public enum Spectrogram {
     static let sampleRate = 44100, frameSize = 2048, hop = 441, fftBins = 1024
     public static let stemNames = ["bass", "drums", "other", "vocals"]
 
-    /// Spectrogram of the four stems `bass.wav`, `drums.wav`, `other.wav` and `vocals.wav` in `directory`.
+    /// Spectrogram of the four stems `bass`, `drums`, `other` and `vocals` in `directory`, each as .wav, .mp3, .m4a or .flac.
     public static func stems(in directory: URL) throws -> MLXArray {
         let specs = try stemNames.map { name -> MLXArray in
-            let stem = try Stem(contentsOf: directory.appendingPathComponent(name + ".wav"))
+            let files = ["wav", "mp3", "m4a", "flac"].map { directory.appendingPathComponent(name + "." + $0) }
+            let stem = try Stem(contentsOf: files.first { FileManager.default.fileExists(atPath: $0.path) } ?? files[0])  // none: report the .wav
             let s = compute(stem.samples, integer: stem.integer)
             eval(s)
             return s

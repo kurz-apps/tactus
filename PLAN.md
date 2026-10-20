@@ -25,6 +25,11 @@ Each step is done only when its check passes. Architecture is described in the [
 
    The reference took 287 s for the 90 s excerpt (CPU, Linux container), about 170× more. Over HTTP the 90 s excerpt takes 1.8 s including the 64 MB upload. The 270 s input is for time and memory only: it is not a real song and has no reference output.
 
+7. **Formats** — done. `Stem` (`Audio.swift`) reads WAV, MP3, M4A and FLAC through `AVAudioFile`, resamples with `AVAudioConverter` when the file is not 44.1 kHz, and rounds everything except 32-bit float WAV to 16 bits before the mono mix. `analyze` takes each stem with any of the four extensions; `serve` takes any of them (the upload is written to a temporary directory, and the format is detected from the content). Unreadable audio is still a 422.
+   - WAV is unchanged: spectrogram max error 4.1e-6 against `spec.npy`, the same as before.
+   - Test: `AudioTests` writes a 440 Hz tone as FLAC (44.1 kHz, within 1 of the 16-bit tone) and as AAC at 48 kHz (resampled: 44100 samples, peak and zero crossings within tolerance).
+   - The 90 s excerpt, stems converted with ffmpeg to FLAC, with `afconvert` to AAC 256 kbps and with lame to MP3 256 kbps: the JSON is identical to the WAV one in all three, and so is a `serve` upload that mixes the four formats. Spectrogram 0.2–0.4 s instead of 0.08 s (decoding).
+
 ## Risks
 
 - The 2D layer gathers `5×5` windows. Evaluating one fold at a time keeps the peak at 4.7 GB for 270 s (it was 11.5 GB with the 8 folds in one graph); a 10-minute song would need roughly 10 GB (extrapolated, not measured).

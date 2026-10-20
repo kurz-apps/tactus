@@ -3,7 +3,7 @@ import Network
 import Tactus
 
 // tactus-cli analyze <stems dir> [--weights DIR]    JSON on stdout, time per stage on stderr
-// tactus-cli serve [--port 8080] [--weights DIR]    POST /analyze, multipart/form-data with the files bass, drums, other, vocals (.wav)
+// tactus-cli serve [--port 8080] [--weights DIR]    POST /analyze, multipart/form-data with the files bass, drums, other, vocals (wav, mp3, m4a, flac)
 
 var args = Array(CommandLine.arguments.dropFirst())
 func option(_ name: String, default value: String) -> String {
@@ -102,7 +102,8 @@ final class Request {
             defer { try? FileManager.default.removeItem(at: directory) }
             do {
                 try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-                for name in Spectrogram.stemNames { try files[name]!.write(to: directory.appendingPathComponent(name + ".wav")) }  // only the known names reach the file system
+                // only the known names reach the file system; the format is detected from the content, so the extension is just a name
+                for name in Spectrogram.stemNames { try files[name]!.write(to: directory.appendingPathComponent(name + ".wav")) }
                 reply(200, json: try encoder.encode(analyzer.analyze(stems: directory)))
             } catch let error as TactusError {
                 reply(422, "\(error)")

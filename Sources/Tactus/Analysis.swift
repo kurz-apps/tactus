@@ -64,7 +64,7 @@ public struct Analyzer {
         downbeatThreshold = config.folds.map(\.best_threshold_downbeat).reduce(0, +) / Double(config.folds.count)
     }
 
-    /// `directory` holds `bass.wav`, `drums.wav`, `other.wav` and `vocals.wav`. `stage` is told how long each stage took.
+    /// `directory` holds `bass`, `drums`, `other` and `vocals` as .wav, .mp3, .m4a or .flac. `stage` is told how long each stage took.
     public func analyze(stems directory: URL, stage: (String, TimeInterval) -> Void = { _, _ in }) throws -> Analysis {
         func timed<T>(_ name: String, _ work: () throws -> T) rethrows -> T {
             let start = Date()
